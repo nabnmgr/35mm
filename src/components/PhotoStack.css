@@ -1,0 +1,18 @@
+.photo-stack {
+    border: 2px solid salmon;
+}
+
+.photos {
+    position: relative;
+    height: 370px;
+    width: 300px;
+}
+
+.photo {
+    @apply border-8 border-white shadow-md;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}

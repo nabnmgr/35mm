@@ -1,19 +1,11 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import PhotoStack from './components/PhotoStack';
 
 function App() {
     return (
         <div className='App'>
-            <header className='App-header'>
-                <img src={logo} className='App-logo' />
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <a className='App-link' href='https://reactjs.org' target='_blank'>
-                    Learn React
-                </a>
-            </header>
+            <PhotoStack />
         </div>
     );
 }
