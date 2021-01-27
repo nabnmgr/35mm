@@ -1,9 +1,27 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useSpring, animated } from 'react-spring';
+import { useDrag } from 'react-use-gesture';
 import gsap from 'gsap';
 import './PhotoStack.css';
 
 const PhotoStack = () => {
     const photosRef = useRef([]);
+
+    const [props, set] = useSpring(() => ({
+        x: 0,
+        y: 0,
+        scale: 1,
+    }));
+
+    const bind = useDrag(({ active, movement: [x, y] }) => {
+        console.info('useDrag', active, x, y);
+        set({
+            x: active ? x : 0,
+            y: active ? y : 0,
+            scale: active ? 1.05 : 1,
+            immediate: active,
+        });
+    });
 
     const stackIn = () => {
         gsap.fromTo(
@@ -63,10 +81,12 @@ const PhotoStack = () => {
                     }}
                     className='photo bg-purple-300'
                 />
-                <div
+                <animated.div
                     ref={(el) => {
                         photosRef.current[5] = el;
                     }}
+                    {...bind()}
+                    style={props}
                     className='photo bg-gray-300'
                 />
             </div>
