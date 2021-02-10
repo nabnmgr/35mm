@@ -1,26 +1,50 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useSpring, animated } from 'react-spring';
 import { useDrag } from 'react-use-gesture';
 import gsap from 'gsap';
 import './PhotoStack.css';
 
+const arrayMove = require('array-move');
+
+const items = ['blue', 'red', 'indigo', 'green', 'purple', 'gray'];
+
 const PhotoStack = () => {
     const photosRef = useRef([]);
+    const [index, setIndex] = useState(items.length - 1);
+    const [photos, setPhotos] = useState(items);
 
-    const [props, set] = useSpring(() => ({
-        x: 0,
-        y: 0,
-        scale: 1,
-    }));
+    const bind = useDrag((state) => {
+        const {
+            active,
+            movement: [x, y],
+        } = state;
+        const i = state.args;
 
-    const bind = useDrag(({ active, movement: [x, y] }) => {
-        console.info('useDrag', active, x, y);
-        set({
+        console.info('change zindex', x, y);
+
+        gsap.to(state.event.target, {
+            duration: 0.6,
             x: active ? x : 0,
             y: active ? y : 0,
             scale: active ? 1.05 : 1,
-            immediate: active,
+            ease: 'Power4.easeOut',
+            onComplete: () => {
+                console.info('onComplete');
+                if (active || x > -310) return;
+                gsap.set(photosRef.current, {
+                    css: { zIndex: 2 },
+                });
+                setPhotos(arrayMove(photos, i, 0));
+            },
         });
+
+        if (!active && (x < -310 || x > 310)) {
+            // gsap.set(photosRef.current, {
+            //     css: { zIndex: 2 },
+            // });
+            gsap.set(photosRef.current[i], {
+                css: { zIndex: 1 },
+            });
+        }
     });
 
     const stackIn = () => {
@@ -51,44 +75,16 @@ const PhotoStack = () => {
     return (
         <div className='photo-stack flex justify-center my-20'>
             <div className='photos'>
-                <div
-                    ref={(el) => {
-                        photosRef.current[0] = el;
-                    }}
-                    className='photo bg-blue-300'
-                />
-                <div
-                    ref={(el) => {
-                        photosRef.current[1] = el;
-                    }}
-                    className='photo bg-red-300'
-                />
-                <div
-                    ref={(el) => {
-                        photosRef.current[2] = el;
-                    }}
-                    className='photo bg-indigo-300'
-                />
-                <div
-                    ref={(el) => {
-                        photosRef.current[3] = el;
-                    }}
-                    className='photo bg-green-300'
-                />
-                <div
-                    ref={(el) => {
-                        photosRef.current[4] = el;
-                    }}
-                    className='photo bg-purple-300'
-                />
-                <animated.div
-                    ref={(el) => {
-                        photosRef.current[5] = el;
-                    }}
-                    {...bind()}
-                    style={props}
-                    className='photo bg-gray-300'
-                />
+                {photos.map((photo, i) => (
+                    <div
+                        key={i}
+                        ref={(el) => {
+                            photosRef.current[i] = el;
+                        }}
+                        {...bind(i)}
+                        className={`photo bg-${photo}-300`}
+                    />
+                ))}
             </div>
         </div>
     );
