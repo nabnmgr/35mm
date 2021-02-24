@@ -17,3 +17,7 @@
     width: 100%;
     z-index: 2;
 }
+
+.photo:last-child {
+    left: -50px;
+}
