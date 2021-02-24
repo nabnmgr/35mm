@@ -1,89 +1,41 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useDrag } from 'react-use-gesture';
-import gsap from 'gsap';
+import { motion, useMotionValue, useAnimation } from 'framer-motion';
 import './PhotoStack.css';
 
-const arrayMove = require('array-move');
-
-const items = ['blue', 'red', 'indigo', 'green', 'purple', 'gray'];
+const data = [
+    { id: 0, source: 'images/000022.jpg', description: '', landscapeMode: false },
+    { id: 1, source: 'images/3603.jpg', description: '', landscapeMode: false },
+    { id: 2, source: 'images/3138.jpg', description: '', landscapeMode: false },
+    { id: 3, source: 'images/3276.jpg', description: '', landscapeMode: false },
+    { id: 4, source: 'images/000008.jpg', description: '', landscapeMode: false },
+    { id: 5, source: 'images/000014.jpg', description: '', landscapeMode: false },
+    { id: 6, source: 'images/3203.jpg', description: '', landscapeMode: false },
+];
 
 const PhotoStack = () => {
-    const photosRef = useRef([]);
-    const [index, setIndex] = useState(items.length - 1);
-    const [photos, setPhotos] = useState(items);
-
-    const bind = useDrag((state) => {
-        const {
-            active,
-            movement: [x, y],
-        } = state;
-        const i = state.args;
-
-        console.info('change zindex', x, y);
-
-        gsap.to(state.event.target, {
-            duration: 0.6,
-            x: active ? x : 0,
-            y: active ? y : 0,
-            scale: active ? 1.05 : 1,
-            ease: 'Power4.easeOut',
-            onComplete: () => {
-                console.info('onComplete');
-                if (active || x > -310) return;
-                gsap.set(photosRef.current, {
-                    css: { zIndex: 2 },
-                });
-                setPhotos(arrayMove(photos, i, 0));
-            },
-        });
-
-        if (!active && (x < -310 || x > 310)) {
-            // gsap.set(photosRef.current, {
-            //     css: { zIndex: 2 },
-            // });
-            gsap.set(photosRef.current[i], {
-                css: { zIndex: 1 },
-            });
-        }
-    });
-
-    const stackIn = () => {
-        gsap.fromTo(
-            photosRef.current,
-            {
-                y: (i) => -500 - (i + 1) * 10,
-                x: (i) => 100 * Math.sin((i + 1) * 45),
-                rotate: (i) => 20 * Math.sin((i + 1) * 45),
-                opacity: 0,
-            },
-            {
-                duration: 1.2,
-                y: (i) => Math.sin(i + 2) * 10,
-                x: (i) => Math.sin(i + 2) * 5,
-                rotate: (i) => Math.sin(i + 3) * 2,
-                opacity: 1,
-                ease: 'Power4.easeOut',
-                stagger: 0.1,
-            }
-        );
-    };
-
-    useEffect(() => {
-        stackIn();
-    }, []);
+    const controls = useAnimation();
 
     return (
         <div className='photo-stack flex justify-center my-20'>
             <div className='photos'>
-                {photos.map((photo, i) => (
-                    <div
-                        key={i}
-                        ref={(el) => {
-                            photosRef.current[i] = el;
-                        }}
-                        {...bind(i)}
-                        className={`photo bg-${photo}-300`}
-                    />
+                {data.map((photo) => (
+                    <motion.div key={photo.id}>
+                        <motion.img
+                            drag
+                            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                            dragElastic={0.7}
+                            onDrag={(event, info) => {
+                                // console.log('onDragEnd', info.offset.x);
+                            }}
+                            onDragEnd={(event, info) => {
+                                console.log('onDragEnd', info.offset.x);
+                            }}
+                            className='photo'
+                            src={photo.source}
+                            animate={controls}
+                            alt=''
+                        />
+                    </motion.div>
                 ))}
             </div>
         </div>
