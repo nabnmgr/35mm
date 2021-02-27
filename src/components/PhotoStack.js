@@ -15,6 +15,7 @@ const data = [
 const PhotoStack = () => {
     const [stack, setStack] = useState(data);
     const [current, setCurrent] = useState(data[data.length - 1].id);
+    const [direction, setDirection] = useState(-1);
     const controls = useAnimation();
 
     useEffect(() => {
@@ -22,28 +23,25 @@ const PhotoStack = () => {
         setCurrent(stack[stack.length - 1].id);
     }, [stack]);
 
-    useEffect(() => {
-        console.info('useEffect.stack', current);
-    }, [current]);
+    const variants = {
+        moveOutside: {
+            x: (window.screen.width / 2) * direction,
+            rotate: 5 * direction,
+            transition: { duration: 0.5 },
+        },
+    };
 
     const handleDragEnd = (info) => {
         const dragOffSetX = info.offset.x;
-        if (dragOffSetX > -450 && dragOffSetX < 450) return;
+        // if (dragOffSetX > -450 && dragOffSetX < 450) return;
+        setDirection(dragOffSetX < 0 ? -1 : 1);
 
-        const direction = dragOffSetX < 0 ? -1 : 1;
-        const endX = (window.screen.width / 2) * direction;
-        const rotation = 5 * direction;
-
-        controls.start({
-            x: endX,
-            y: info.offset.y,
-            rotate: rotation,
-            transition: { duration: 0.5 },
-        });
+        console.info('handleDragEnd', direction);
+        controls.start('moveOutside');
     };
 
-    const onComplete = () => {
-        console.info('onAnimationEnd');
+    const onComplete = (definition) => {
+        if (definition !== 'moveOutside') return;
         setStack(stack.filter((photo) => photo.id !== stack.length - 1));
     };
 
@@ -57,13 +55,15 @@ const PhotoStack = () => {
                                 drag
                                 dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                                 dragElastic={0.7}
+                                whileTap={{ scale: 1.1 }}
                                 onDrag={(event, info) => {
-                                    console.log(info.point.x);
+                                    console.log('onDrag', info.point.x);
                                 }}
                                 onDragEnd={(event, info) => {
                                     handleDragEnd(info);
                                 }}
                                 animate={controls}
+                                variants={variants}
                                 onAnimationComplete={onComplete}
                                 key={photo.id}
                                 className='photo'
